@@ -2,10 +2,11 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package*.json ./
+# Copy from backend directory (when build context is root)
+COPY backend/package*.json ./
 RUN npm install
 
-COPY . .
+COPY backend/ .
 RUN npm run build
 
 # Production stage
