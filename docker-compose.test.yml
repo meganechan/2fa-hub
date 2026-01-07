@@ -1,0 +1,45 @@
+services:
+  mongodb-test:
+    image: mongo:7.0
+    container_name: mongodb-test
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongodb_test_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: 2fa-hub
+    networks:
+      - 2fa-network
+
+  backend:
+    image: 2fa-hub-backend
+    container_name: 2fa-hub-backend
+    ports:
+      - "3002:3000"
+    environment:
+      MONGODB_URI: mongodb://mongodb-test:27017/2fa-hub
+      PORT: 3000
+      NODE_ENV: production
+      JWT_SECRET: dev-secret-key-change-in-production-please-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      ENCRYPTION_KEY: R5nBr1aKUCvbti6vskDpC3BAoUj1T/EL
+      FRONTEND_URL: http://localhost:8080
+    depends_on:
+      - mongodb-test
+    networks:
+      - 2fa-network
+
+  frontend:
+    image: 2fa-hub-frontend
+    container_name: 2fa-hub-frontend
+    ports:
+      - "8080:80"
+    networks:
+      - 2fa-network
+
+volumes:
+  mongodb_test_data:
+
+networks:
+  2fa-network:
+    driver: bridge
