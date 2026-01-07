@@ -9,15 +9,15 @@ RUN npm install
 COPY frontend/ .
 RUN npm run build
 
-# Production stage with Nginx
-FROM nginx:alpine AS production
+# Production stage - use serve instead of nginx
+FROM node:20-alpine AS production
+WORKDIR /app
 
-# Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
+RUN npm install -g serve
 
-# Copy nginx config
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/dist ./dist
 
+ENV PORT=80
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "80"]
